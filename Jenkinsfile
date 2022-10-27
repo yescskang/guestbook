@@ -4,7 +4,7 @@ def TODAY = (new SimpleDateFormat("yyyyMMddHHmmss")).format(new Date())
 
 pipeline {
     //agent any
-    agent master
+    agent { label 'master' }
     environment {
         strDockerTag = "${TODAY}_${BUILD_ID}"
         strDockerImage ="yescskang/cicd_guestbook:${strDockerTag}"
