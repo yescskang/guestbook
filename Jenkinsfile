@@ -111,7 +111,7 @@ pipeline {
     post { 
         always { 
             emailext (attachLog: true, body: '본문', compressLog: true
-                    , recipientProviders: [buildUser()], subject: '제목', to: 'yescskang.j@gmail.com')
+                    , recipientProviders: [buildUser()], subject: '제목', to: 'yescskang@gmail.com')
 
         }
         success { 
