@@ -3,7 +3,8 @@ import java.text.SimpleDateFormat
 def TODAY = (new SimpleDateFormat("yyyyMMddHHmmss")).format(new Date())
 
 pipeline {
-    agent any
+    //agent any
+    agent master
     environment {
         strDockerTag = "${TODAY}_${BUILD_ID}"
         strDockerImage ="yescskang/cicd_guestbook:${strDockerTag}"
@@ -11,16 +12,19 @@ pipeline {
 
     stages {
         stage('Checkout') {
+            agent { label 'agent1'}
             steps {
                 git branch: 'master', url:'https://github.com/yescskang/guestbook.git'
             }
         }
         stage('Build') {
+            agent { label 'agent1'}
             steps {
                 sh './mvnw clean package'
             }
         }
         stage('Unit Test') {
+            agent { label 'agent1'}
             steps {
                 sh './mvnw test'
             }
@@ -33,6 +37,7 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            agent { label 'agent1'}
             steps{
                 echo 'SonarQube Analysis'
                 /*
@@ -48,6 +53,7 @@ pipeline {
             }
         }
         stage('SonarQube Quality Gate'){
+            agent { label 'agent1'}
             steps{
                 echo 'SonarQube Quality Gate'
                 /*
@@ -66,6 +72,7 @@ pipeline {
             }
         }
         stage('Docker Image Build') {
+            agent { label 'agent1'}
             steps {
                 script {
                     //oDockImage = docker.build(strDockerImage)
@@ -74,6 +81,7 @@ pipeline {
             }
         }
         stage('Docker Image Push') {
+            agent { label 'agent1'}
             steps {
                 script {
                     docker.withRegistry('', 'DockerHub_yescskang') {
@@ -83,23 +91,27 @@ pipeline {
             }
         }
         stage('Staging Deploy') {
+            agent { label 'master'}
             steps {
-                sshagent(credentials: ['Staging-PrivateKey']) {
-                    sh "ssh -o StrictHostKeyChecking=no root@192.168.56.144 docker container rm -f guestbookapp"
-                    sh "ssh -o StrictHostKeyChecking=no root@192.168.56.144 docker container run \
-                                        -d \
-                                        -p 38080:80 \
-                                        --name=guestbookapp \
-                                        -e MYSQL_IP=172.31.61.234 \
-                                        -e MYSQL_PORT=3306 \
-                                        -e MYSQL_DATABASE=guestbook \
-                                        -e MYSQL_USER=root \
-                                        -e MYSQL_PASSWORD=education \
-                                        ${strDockerImage} "
-                }
+                echo "Staging Deploy"
+
+                // sshagent(credentials: ['Staging-PrivateKey']) {
+                //     sh "ssh -o StrictHostKeyChecking=no root@192.168.56.144 docker container rm -f guestbookapp"
+                //     sh "ssh -o StrictHostKeyChecking=no root@192.168.56.144 docker container run \
+                //                         -d \
+                //                         -p 38080:80 \
+                //                         --name=guestbookapp \
+                //                         -e MYSQL_IP=172.31.61.234 \
+                //                         -e MYSQL_PORT=3306 \
+                //                         -e MYSQL_DATABASE=guestbook \
+                //                         -e MYSQL_USER=root \
+                //                         -e MYSQL_PASSWORD=education \
+                //                         ${strDockerImage} "
+                // }
             }
         }
         stage ('JMeter LoadTest') {
+            agent { label 'agent1'}
             steps { 
                 echo "JMeter LoadTest"
 
