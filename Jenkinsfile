@@ -12,19 +12,19 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps {
                 git branch: 'master', url:'https://github.com/yescskang/guestbook.git'
             }
         }
         stage('Build') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps {
                 sh './mvnw clean package'
             }
         }
         stage('Unit Test') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps {
                 sh './mvnw test'
             }
@@ -37,7 +37,7 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps{
                 echo 'SonarQube Analysis'
                 /*
@@ -53,7 +53,7 @@ pipeline {
             }
         }
         stage('SonarQube Quality Gate'){
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps{
                 echo 'SonarQube Quality Gate'
                 /*
@@ -72,7 +72,7 @@ pipeline {
             }
         }
         stage('Docker Image Build') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps {
                 script {
                     //oDockImage = docker.build(strDockerImage)
@@ -81,7 +81,7 @@ pipeline {
             }
         }
         stage('Docker Image Push') {
-            agent { label 'agent1'}
+            agent { label 'master'}
             steps {
                 script {
                     docker.withRegistry('', 'DockerHub_yescskang') {
@@ -91,7 +91,7 @@ pipeline {
             }
         }
         stage('Staging Deploy') {
-            agent { label 'master'}
+            agent { label 'agent1'}
             steps {
                 echo "Staging Deploy"
 
